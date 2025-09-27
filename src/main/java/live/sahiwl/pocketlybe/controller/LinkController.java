@@ -1,33 +1,46 @@
 package live.sahiwl.pocketlybe.controller;
 
+import live.sahiwl.pocketlybe.dto.ContentResponseDTO;
 import live.sahiwl.pocketlybe.dto.LinkRequestDTO;
 import live.sahiwl.pocketlybe.dto.LinkResponseDTO;
+import live.sahiwl.pocketlybe.dto.PocketDTO;
+import live.sahiwl.pocketlybe.model.User;
+import live.sahiwl.pocketlybe.service.ContentService;
 import live.sahiwl.pocketlybe.service.LinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/links")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class LinkController {
 
     private final LinkService linkService;
+    private final ContentService contentService;
 
-    @PostMapping
-    public LinkResponseDTO createLink(@RequestBody LinkRequestDTO req){
-        return linkService.createLink(req.getUserId(), req.getOriginalURL());
+    @GetMapping("/pocket/{hash}")
+    public PocketDTO getPocket(@PathVariable String hash){
+       return linkService.getUserPocketBySharedHash(hash);
     }
 
-    @GetMapping("/user/{userId}")
-    public List<LinkResponseDTO> getLinksByUser(@PathVariable Long userId){
-        return linkService.getLinksByUser(userId);
-    }
+    // Create or disable share link (TODO: secure with auth in Phase 8)
+    @PostMapping("/pocket/share")
+    public Map<String, Object> createShareLink(
+            @RequestParam Long userId, // TODO: replace with userId from token after auth
+            @RequestParam boolean share
+    ) {
+        LinkResponseDTO dto = linkService.createShareLink(userId, share);
 
-    //TODO: remove userId from params, use JWT or session instead.
-    @DeleteMapping("/{linkId}")
-    public String deleteLink(@PathVariable Long linkId, @RequestParam Long userId){
-        return linkService.deleteLink(linkId, userId);
+        Map<String, Object> response = new HashMap<>();
+        if (dto == null) {
+            response.put("message", "Sharing disabled");
+        } else {
+            response.put("link", "http://localhost:8080/api/pocket/" + dto.getHash());
+        }
+        return response;
     }
 }

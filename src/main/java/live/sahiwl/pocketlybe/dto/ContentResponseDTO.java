@@ -1,18 +1,21 @@
 package live.sahiwl.pocketlybe.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
-
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContentDTO {
+@Builder
+public class ContentResponseDTO {
     private Long id;
     private String title;
     private String type;
     private String link;
     private Long userId;
+    private String username;
     private List<String> tags;
 }

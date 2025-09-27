@@ -1,15 +1,14 @@
 package live.sahiwl.pocketlybe.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagDTO {
-    private Long id;
-    private String title;
+public class PocketDTO {
+    private String username;
+    private List<ContentResponseDTO> content;
 }
