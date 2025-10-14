@@ -2,7 +2,6 @@ package live.sahiwl.pocketlybe.controller;
 
 import live.sahiwl.pocketlybe.dto.TagRequestDTO;
 import live.sahiwl.pocketlybe.dto.TagResponseDTO;
-import live.sahiwl.pocketlybe.repository.TagRepository;
 import live.sahiwl.pocketlybe.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

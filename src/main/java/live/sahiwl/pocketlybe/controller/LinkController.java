@@ -1,17 +1,13 @@
 package live.sahiwl.pocketlybe.controller;
 
-import live.sahiwl.pocketlybe.dto.ContentResponseDTO;
-import live.sahiwl.pocketlybe.dto.LinkRequestDTO;
 import live.sahiwl.pocketlybe.dto.LinkResponseDTO;
 import live.sahiwl.pocketlybe.dto.PocketDTO;
-import live.sahiwl.pocketlybe.model.User;
 import live.sahiwl.pocketlybe.service.ContentService;
 import live.sahiwl.pocketlybe.service.LinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
