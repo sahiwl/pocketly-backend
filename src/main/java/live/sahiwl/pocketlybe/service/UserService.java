@@ -61,6 +61,10 @@ public class UserService {
                 .message("User registered successfully")
                 .build();
     }
+    @Transactional(readOnly=true)
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username).orElseThrow(()-> new RuntimeException("User not found: " + username));
+    }
 
     // public User saveUser(User user) {
     //     user.setPassword(encoder.encode(user.getPassword()));

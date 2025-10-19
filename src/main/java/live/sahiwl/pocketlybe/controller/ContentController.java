@@ -2,11 +2,17 @@ package live.sahiwl.pocketlybe.controller;
 
 import live.sahiwl.pocketlybe.dto.ContentRequestDTO;
 import live.sahiwl.pocketlybe.dto.ContentResponseDTO;
+import live.sahiwl.pocketlybe.model.User;
 import live.sahiwl.pocketlybe.service.ContentService;
+import live.sahiwl.pocketlybe.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/content")
@@ -14,20 +20,63 @@ import java.util.List;
 public class ContentController {
 
     private final ContentService contentService;
+    private final UserService userService;
 
-    // Add content (TODO: secure with auth in Phase 8)
+    
     @PostMapping
-    public ContentResponseDTO createContent(@RequestBody ContentRequestDTO request){
-        // TODO: get userId from token after auth
-    return contentService.createContent(request);
+    public ContentResponseDTO createContent(@RequestBody ContentRequestDTO request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
+
+        User user = userService.findByUsername(username);
+
+        // Override any userId sent by client with authenticated user's ID for security
+        request.setUserId(user.getId());
+
+        return contentService.createContent(request);
     }
 
-    // Get all content for a user
+  
     @GetMapping
-    public List<ContentResponseDTO> getContentByUser(
-            @RequestParam Long userId // TODO: replace with userId from token after auth
-    ) {
-        return contentService.getContentByUser(userId);
+    public List<ContentResponseDTO> getMyContent() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+
+        User user = userService.findByUsername(username);
+
+
+        return contentService.getContentByUser(user.getId());
     }
+
+    
+    @PutMapping("/{contentId}")
+    public ContentResponseDTO updateContent(
+            @PathVariable Long contentId,
+            @RequestBody ContentRequestDTO request) {
+        // Extract username from JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+
+        User user = userService.findByUsername(username);
+
+
+        return contentService.updateContent(contentId, user.getId(), request);
+    }
+
+    @DeleteMapping("/{contentId}")
+    public ResponseEntity<Map<String, String>> deleteContent(@PathVariable Long contentId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userService.findByUsername(username);
+
+        contentService.deleteContent(contentId, user.getId());
+
+        return ResponseEntity.ok(Map.of("message", "Content deleted successfully"));
+    }
+
 }
