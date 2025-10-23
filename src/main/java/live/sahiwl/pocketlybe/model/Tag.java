@@ -22,6 +22,10 @@ public class Tag {
 
     private String title;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdBy;
+
     @ManyToMany(mappedBy = "tags")
     private List<Content> contents;
 }
