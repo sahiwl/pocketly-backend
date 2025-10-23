@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class TagController {
     private final TagService tagService;
 
     @PostMapping
-    public Map<String, Object> createTag(@RequestBody TagRequestDTO req) {
+    public Map<String, Object> createTag(@Valid @RequestBody TagRequestDTO req) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal()))
                 ? auth.getName()

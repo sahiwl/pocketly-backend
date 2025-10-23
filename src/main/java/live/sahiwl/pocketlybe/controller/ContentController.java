@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -22,12 +23,10 @@ public class ContentController {
     private final ContentService contentService;
     private final UserService userService;
 
-    
     @PostMapping
-    public ContentResponseDTO createContent(@RequestBody ContentRequestDTO request) {
+    public ContentResponseDTO createContent(@Valid @RequestBody ContentRequestDTO request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-
 
         User user = userService.findByUsername(username);
 
@@ -37,32 +36,26 @@ public class ContentController {
         return contentService.createContent(request);
     }
 
-  
     @GetMapping
     public List<ContentResponseDTO> getMyContent() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-
         User user = userService.findByUsername(username);
-
 
         return contentService.getContentByUser(user.getId());
     }
 
-    
     @PutMapping("/{contentId}")
     public ContentResponseDTO updateContent(
             @PathVariable Long contentId,
-            @RequestBody ContentRequestDTO request) {
+            @Valid @RequestBody ContentRequestDTO request) {
         // Extract username from JWT
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-
         User user = userService.findByUsername(username);
-
 
         return contentService.updateContent(contentId, user.getId(), request);
     }
