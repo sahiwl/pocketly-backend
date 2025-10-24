@@ -35,7 +35,6 @@ public class SecurityConfig {
     @Value("${FE_URL}")
     private String feurl;
 
-
     @Value("${DEV_FE_URL}")
     private String devurl;
 
@@ -45,7 +44,9 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 feurl,
                 devurl));
-        configuration.applyPermitDefaultValues();
+        configuration.setAllowCredentials(true); // req for HTTP-only cookies
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -67,7 +68,8 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/auth/signup", "/api/auth/signin", "/hello", "/health", "/api/pocket/**")
+                        .requestMatchers("/api/auth/signup", "/api/auth/signin",
+                                "/api/auth/logout", "/hello", "/health", "/api/pocket/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/tags").permitAll()

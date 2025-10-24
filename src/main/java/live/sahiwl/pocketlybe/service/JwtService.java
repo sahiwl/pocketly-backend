@@ -1,12 +1,8 @@
 package live.sahiwl.pocketlybe.service;
 
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,51 +12,36 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 
-import java.util.function.Function; 
-import javax.crypto.spec.SecretKeySpec; 
+import java.util.function.Function;
+import javax.crypto.spec.SecretKeySpec;
 
 @Service
 public class JwtService {
-    
+
     @Value("${JWT_SECRET}")
     private String secretKey;
 
-        @Value("${JWT_EXPIRATION}") // 24 hours default
-    private Long expiration;
+    @Value("${JWT_EXPIRATION}") // 3 days default (in ms)
+    private Long tokenExpiration;
 
-    // public JwtService(){
-    //     secretKey = generateSecretKey();
-    // }
-
-    // private String generateSecretKey(){
-    //     try {
-    //         KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-    //         SecretKey secretKey = keyGen.generateKey();
-    //         System.out.println("Secret Key: "+ secretKey.toString());
-    //         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-    //     } catch (Exception e) {
-    //         throw new RuntimeException("Error getting secret key: ", e);
-    //     }
-    // }
-
-    public String generateToken(String username){
-
-        Map<String, Object> claims= new HashMap<>();
+    public String generateToken(String username, Long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
 
         return Jwts.builder()
-        .setClaims(claims)
-        .setSubject(username)
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + expiration))
-        .signWith(getKey(), SignatureAlgorithm.HS256).compact();
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                .signWith(getKey(), SignatureAlgorithm.HS256).compact();
     }
 
-     private SecretKeySpec getKey() {
+    private SecretKeySpec getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
+
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
         final Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
@@ -71,13 +52,11 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getKey())
                 .build().parseClaimsJws(token).getBody();
     }
-
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
