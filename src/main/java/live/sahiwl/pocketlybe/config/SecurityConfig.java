@@ -71,9 +71,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signup", "/api/auth/signin",
                                 "/api/auth/logout", "/hello", "/health", "/api/pocket/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/tags").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll() 
+                        .anyRequest().authenticated()) 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

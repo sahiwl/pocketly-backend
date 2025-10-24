@@ -21,10 +21,9 @@ public class TagController {
 
     @PostMapping
     public Map<String, Object> createTag(@Valid @RequestBody TagRequestDTO req) {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal()))
-                ? auth.getName()
-                : null;
+        String username = auth.getName();
 
         TagResponseDTO tag = tagService.createTag(req, username);
         return Map.of(
