@@ -10,14 +10,15 @@ import live.sahiwl.pocketlybe.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -40,8 +41,11 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
-    @Value("${COOKIE_SECURE}") //true for prod
+    @Value("${COOKIE_SECURE}") // false for dev, true for prod
     private boolean cookieSecure;
+
+    @Value("${SAME_SITE}") 
+    private String sameSite;
 
     public UserController(UserService userSer, UserRepository userRepository) {
         this.userService = userSer;
@@ -61,15 +65,18 @@ public class UserController {
                     user.getUsername(),
                     user.getId());
 
-            // Set JWT cookie (HttpOnly, 3 days)
-            Cookie jwtCookie = new Cookie("accessToken", token);
-            jwtCookie.setHttpOnly(true);
-            jwtCookie.setSecure(cookieSecure);
-            jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(3 * 24 * 60 * 60); // 3 days
-            response.addCookie(jwtCookie);
+            // Use ResponseCookie for SameSite support
+            ResponseCookie jwtCookie = ResponseCookie.from("accessToken", token)
+                    .httpOnly(true)
+                    .secure(cookieSecure)
+                    .path("/")
+                    .maxAge(3 * 24 * 60 * 60) // 3 days
+                    .sameSite(sameSite) // Critical for cross-origin requests
+                    .build();
 
-            authResponse.setToken(token); // Update token in response
+            response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+
+            authResponse.setToken(token); 
 
             return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
         } catch (Exception e) {
@@ -91,18 +98,20 @@ public class UserController {
             if (authentication.isAuthenticated()) {
                 User user = userService.findByUsername(request.getUsername());
 
-
                 String token = jwtService.generateToken(
                         user.getUsername(),
                         user.getId());
 
+                // Use ResponseCookie for SameSite support
+                ResponseCookie jwtCookie = ResponseCookie.from("accessToken", token)
+                        .httpOnly(true)
+                        .secure(cookieSecure)
+                        .path("/")
+                        .maxAge(3 * 24 * 60 * 60) // 3 days
+                        .sameSite(sameSite) // Critical for cross-origin requests
+                        .build();
 
-                Cookie jwtCookie = new Cookie("accessToken", token);
-                jwtCookie.setHttpOnly(true);
-                jwtCookie.setSecure(cookieSecure); // true for HTTPS in production
-                jwtCookie.setPath("/");
-                jwtCookie.setMaxAge(3 * 24 * 60 * 60); // 3 days
-                response.addCookie(jwtCookie);
+                response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
                 AuthResponseDTO authResponse = AuthResponseDTO.builder()
                         .token(token)
@@ -133,13 +142,16 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<AuthResponseDTO> logout(HttpServletResponse response) {
+        // Clear cookie with same settings
+        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0) 
+                .sameSite(sameSite)
+                .build();
 
-        Cookie jwtCookie = new Cookie("accessToken", null);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(cookieSecure);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(0);
-        response.addCookie(jwtCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
         return ResponseEntity.ok(AuthResponseDTO.builder()
                 .message("Logged out successfully")

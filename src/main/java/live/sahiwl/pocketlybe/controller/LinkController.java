@@ -46,7 +46,7 @@ public class LinkController {
         if (dto == null) {
             response.put("message", "Sharing disabled");
         } else {
-            response.put("link", baseUrl + "/api/pocket/" + dto.getHash());
+            response.put("link", baseUrl     + "/api/pocket/" + dto.getHash());
         }
         return response;
     }

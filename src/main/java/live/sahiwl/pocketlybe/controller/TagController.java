@@ -27,7 +27,7 @@ public class TagController {
 
         TagResponseDTO tag = tagService.createTag(req, username);
         return Map.of(
-                "message", "Tag created sucessfully",
+                "message", "Tag created successfully",
                 "data", tag);
     }
 
