@@ -1,6 +1,6 @@
 package live.sahiwl.pocketlybe.service;
 
-import live.sahiwl.pocketlybe.dto.AuthRequestDTO;
+import live.sahiwl.pocketlybe.dto.SignupRequestDTO;
 import live.sahiwl.pocketlybe.dto.AuthResponseDTO;
 import live.sahiwl.pocketlybe.dto.UserResponseDTO;
 import live.sahiwl.pocketlybe.model.User;
@@ -26,23 +26,22 @@ public class UserService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     @Transactional
-    public AuthResponseDTO registerUser(AuthRequestDTO request) {
+    public AuthResponseDTO registerUser(SignupRequestDTO request) {
 
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            throw new RuntimeException("Email is required for registration");
+        String username = request.getUsername();
+        String email = request.getEmail();
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username '" + username + "' already exists.");
         }
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username " + request.getUsername() + " already exists.");
-        }
-
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email " + request.getEmail() + " already registered.");
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email '" + email + "' already registered.");
         }
 
         User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+                .username(username)
+                .email(email)
                 .password(encoder.encode(request.getPassword()))
                 .build();
 
@@ -65,6 +64,14 @@ public class UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
+    }
+
+    @Transactional(readOnly = true)
+    public User findByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findByUsername(usernameOrEmail)
+                .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
+                        .orElseThrow(() -> new RuntimeException(
+                                "User not found with username or email: " + usernameOrEmail)));
     }
 
     // Fetch all users, map entities to DTOs

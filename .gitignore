@@ -37,3 +37,4 @@ roadmap.md
 .env
 docker.env
 *.env
+docs

@@ -17,10 +17,12 @@ public class MyUserDetailsService implements UserDetailsService {
     private UserRepository repo;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        User user = repo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        // Try to find by username first, then by email
+        User user = repo.findByUsername(usernameOrEmail)
+                .orElseGet(() -> repo.findByEmail(usernameOrEmail)
+                        .orElseThrow(() -> new UsernameNotFoundException(
+                                "User not found with username or email: " + usernameOrEmail)));
 
         return new UserPrinciple(user);
     }
