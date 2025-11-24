@@ -19,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -143,6 +144,41 @@ public class UserController {
         @GetMapping("/showallusers")
         public List<UserResponseDTO> getUsers() {
                 return userService.getAllUsers();
+        }
+
+        @GetMapping("/me")
+        public ResponseEntity<?> currUser(){
+                try {           
+
+                                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+
+                                if (authentication == null || !authentication.isAuthenticated() 
+                                                || authentication.getPrincipal().equals("anonymousUser")) {
+                                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                                        .body(AuthResponseDTO.builder()
+                                                                        .message("Not authenticated")
+                                                                        .build());
+                                }
+
+
+                                String username = authentication.getName();
+
+                                User user = userService.findByUsername(username);
+
+                                UserResponseDTO userRes = UserResponseDTO.builder()
+                                                                .id(user.getId())
+                                                                .username(user.getUsername())
+                                                                .build();
+
+                                return ResponseEntity.ok(userRes);
+                } catch (Exception e) {
+                          return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                        .body(AuthResponseDTO.builder()
+                                                        .message("Not authenticated")
+                                                        .build());
+                }
+                
         }
 
         @PostMapping("/logout")
