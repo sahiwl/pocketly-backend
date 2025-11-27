@@ -97,6 +97,8 @@ public class ContentService {
                 .type(content.getType())
                 .link(content.getLink())
                 .description(content.getDescription())
+                .createdAt(content.getCreatedAt())
+                .updatedAt(content.getUpdatedAt())
                 .userId(content.getUser().getId())
                 .username(content.getUser().getUsername())
                 .tags(content.getTags()
