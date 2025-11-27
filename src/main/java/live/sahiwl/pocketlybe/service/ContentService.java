@@ -33,6 +33,7 @@ public class ContentService {
                 .title(request.getTitle())
                 .type(request.getType())
                 .link(request.getLink())
+                .description(request.getDescription())
                 .user(user)
                 .tags(tags)
                 .build();
@@ -64,6 +65,7 @@ public class ContentService {
         content.setTitle(request.getTitle());
         content.setType(request.getType());
         content.setLink(request.getLink());
+        content.setDescription(request.getDescription());
 
         // Update tags if provided
         if (request.getTagIds() != null) {
@@ -94,6 +96,7 @@ public class ContentService {
                 .title(content.getTitle())
                 .type(content.getType())
                 .link(content.getLink())
+                .description(content.getDescription())
                 .userId(content.getUser().getId())
                 .username(content.getUser().getUsername())
                 .tags(content.getTags()

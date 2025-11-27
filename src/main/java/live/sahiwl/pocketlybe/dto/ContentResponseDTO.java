@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,6 +16,7 @@ public class ContentResponseDTO {
     private String title;
     private String type;
     private String link;
+    private String description;
     private Long userId;
     private String username;
     private List<String> tags;
