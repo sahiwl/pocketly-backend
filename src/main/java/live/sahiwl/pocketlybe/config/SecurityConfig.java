@@ -69,7 +69,7 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/signup", "/api/auth/signin",
-                                "/api/auth/logout", "/hello", "/health", "/api/pocket/**")
+                                "/api/auth/logout","/api/auth/me", "/hello", "/health", "/api/pocket/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll() 
                         .anyRequest().authenticated()) 

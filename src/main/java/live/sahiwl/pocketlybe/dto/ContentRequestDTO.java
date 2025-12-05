@@ -3,8 +3,6 @@ package live.sahiwl.pocketlybe.dto;
 import lombok.*;
 
 import java.util.List;
-
-import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
