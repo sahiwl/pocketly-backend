@@ -22,11 +22,11 @@ public class LinkService {
     private  final UserRepository userRepository;
     private final ContentService contentService;
 
-//    @Autowired
-//    public LinkService(LinkRepository linkRepository, UserRepository userRepository) {
-//        this.linkRepository = linkRepository;
-//        this.userRepository = userRepository;
-//    }
+    //    @Autowired
+    //    public LinkService(LinkRepository linkRepository, UserRepository userRepository) {
+    //        this.linkRepository = linkRepository;
+    //        this.userRepository = userRepository;
+    //    }
 
     @Transactional
     public LinkResponseDTO createShareLink(Long userId, boolean share){
@@ -42,9 +42,9 @@ public class LinkService {
 
         if (link == null) {
             link = Link.builder()
-                    .user(user)
-                    .hash(UUID.randomUUID().toString().substring(0, 8))
-                    .build();
+                .user(user)
+                .hash(UUID.randomUUID().toString().substring(0, 8))
+                .build();
             linkRepository.save(link);
         }
 
@@ -52,7 +52,7 @@ public class LinkService {
 
     }
 
-@Transactional(readOnly = true)
+    @Transactional(readOnly = true)
 public PocketDTO getUserPocketBySharedHash(String hash){
         Link link = linkRepository.findByHash(hash).orElseThrow(()-> new RuntimeException("Invalid share link"));
         Long userId = link.getUser().getId();
@@ -60,4 +60,25 @@ public PocketDTO getUserPocketBySharedHash(String hash){
         return new PocketDTO(link.getUser().getUsername(), contents);
     }
 
+    @Transactional(readOnly = true)
+    public LinkResponseDTO getShareLinkByUserId(Long userId) {
+        return linkRepository
+            .findByUserId(userId)
+            .map(link ->
+                LinkResponseDTO.builder()
+                    .id(link.getId())
+                    .hash(link.getHash())
+                    .userId(userId)
+                    .build()
+            )
+            .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public String getShareLinkHash(Long userId) {
+        return linkRepository
+            .findByUserId(userId)
+            .map(Link::getHash)
+            .orElse(null);
+    }
 }
