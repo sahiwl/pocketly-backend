@@ -34,7 +34,13 @@ public class SecurityConfig {
 
     @Value("${FE_URL}")
     private String feurl;
+    
+    @Value("${FE_URL2}")
+    private String feurl2;
 
+    @Value("${MAIN_FE_URL}")
+    private String mainFeurl;
+    
     @Value("${DEV_FE_URL}")
     private String devurl;
 
@@ -43,10 +49,13 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 feurl,
-                devurl));
+                feurl2,
+                devurl,
+                mainFeurl));
         configuration.setAllowCredentials(true); // req for HTTP-only cookies
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
+        configuration.setMaxAge(3600L);  // Cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -68,10 +77,11 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/auth/signup", "/api/auth/signin",
+                        .requestMatchers("/", "/api/auth/signup", "/api/auth/signin",
                                 "/api/auth/logout","/api/auth/me", "/hello", "/health", "/api/pocket/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll() 
+                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()) 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
