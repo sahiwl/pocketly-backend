@@ -78,7 +78,7 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/", "/api/auth/signup", "/api/auth/signin",
-                                "/api/auth/logout","/api/auth/me", "/hello", "/health", "/api/pocket/**")
+                                "/api/auth/logout","/api/auth/me", "/hello", "/ready", "/api/pocket/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
